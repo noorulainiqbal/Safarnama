@@ -1,0 +1,129 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Chat Messages Collection - FIXED
+    match /chat_messages/{messageId} {
+      // Allow read if authenticated and user owns the message
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      // Allow create if authenticated, userId matches, and has required fields
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['userId', 'message', 'timestamp']);
+      
+      // Allow update/delete if authenticated and user owns the message
+      allow update, delete: if isAuthenticated() && 
+                               resource.data.userId == request.auth.uid;
+    }
+    
+    // Travel Stories Collection
+    match /travel_stories/{storyId} {
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      allow update, delete: if isAuthenticated() && 
+                               resource.data.userId == request.auth.uid;
+    }
+    
+    // Chatbot Preferences Collection
+    match /chatbot_preferences/{userId} {
+      allow read, write: if isAuthenticated() && 
+                            request.auth.uid == userId;
+    }
+    
+    // Users Collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && 
+                            request.auth.uid == userId;
+      
+      // Subcollections (like checklist)
+      match /{document=**} {
+        allow read, write: if isAuthenticated() && 
+                              request.auth.uid == userId;
+      }
+    }
+    
+    // Itineraries Collection
+    match /itineraries/{userId} {
+      allow read, write: if isAuthenticated() && 
+                            request.auth.uid == userId;
+      
+      // Schedules subcollection
+      match /schedules/{scheduleId} {
+        allow read, write: if isAuthenticated() && 
+                              request.auth.uid == userId;
+      }
+    }
+    
+    // Scan Feature
+    match /user_scans/{scanId} {
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == request.resource.data.uid;
+      
+      allow read, update, delete: if isAuthenticated() && 
+                                     resource.data.uid == request.auth.uid;
+    }
+    
+    // Budget Feature - Monthly Budgets
+    match /monthly_budgets/{budgetId} {
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      allow update, delete: if isAuthenticated() && 
+                               resource.data.userId == request.auth.uid;
+    }
+    
+    // Budget Feature - Transactions
+    match /budget_transactions/{transactionId} {
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      allow update, delete: if isAuthenticated() && 
+                               resource.data.userId == request.auth.uid;
+    }
+    
+    // Places Collection (if needed)
+    match /places/{placeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // Bookmarks Collection (if needed)
+    match /bookmarks/{bookmarkId} {
+      allow read, write: if isAuthenticated() && 
+                            resource.data.userId == request.auth.uid;
+    }
+    
+    // Profiles Collection (if needed)
+    match /profiles/{userId} {
+      allow read, write: if isAuthenticated() && 
+                            request.auth.uid == userId;
+    }
+    
+    // Checklist Collection (if needed)
+    match /checklists/{checklistId} {
+      allow read, write: if isAuthenticated() && 
+                            resource.data.userId == request.auth.uid;
+    }
+  }
+}

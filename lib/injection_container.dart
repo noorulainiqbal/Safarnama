@@ -44,9 +44,12 @@ Future<void> init() async {
   getIt.registerLazySingleton(() => FirebaseFirestore.instance);
 
   // API Keys - Store them centrally
-  const String googleMapsApiKey = 'REDACTED_GOOGLE_MAPS_API_KEY';
-  const String geminiApiKey =
-      'REDACTED_GEMINI_API_KEY'; // Use same key for now, but Gemini has its own API
+  // Provide these at build time, e.g.:
+  //   flutter run --dart-define=GOOGLE_MAPS_API_KEY=xxx --dart-define=GEMINI_API_KEY=xxx
+  const String googleMapsApiKey = String.fromEnvironment(
+    'GOOGLE_MAPS_API_KEY',
+  );
+  const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
 
   // ================= ROUTE FEATURE =================
   // Data Sources

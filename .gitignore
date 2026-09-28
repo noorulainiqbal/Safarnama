@@ -44,6 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# CocoaPods (regenerate with `pod install`)
+macos/Pods/
+ios/Pods/
+
 # Gradle/Kotlin local caches and logs
 android/.gradle/
 android/.kotlin/
